@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "django_api_starter"
+version = "0.1.0"
+description = ""
+authors = ["Seba Derendarz <seba+git@derendarz.pl>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+uvicorn = "^0.13.4"
+gunicorn = "^20.1.0"
+uvloop = "^0.15.2"
+httptools = "^0.2.0"
+Django = "^3.2.3"
+psycopg2-binary = "^2.8.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.3"
+black = "^21.4b2"
+isort = "^5.8.0"
+bandit = "^1.7.0"
+flake8 = "^3.9.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

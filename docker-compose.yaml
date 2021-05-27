@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  api:
+    image: pixel_polyphony
+    build: 
+      context: ./api
+      target: production
+    restart: always
+    ports: 
+      - 8000:8000
+    links: 
+      - db
+      - redis
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./persistent_data/media:/var/lib/media
+      - ./persistent_data/static:/var/lib/static
+      - ./persistent_data/log/api/django:/var/log/api/django
+      - ./persistent_data/log/api/gunicorn:/var/log/api/gunicorn
+    environment:
+      - SECRET_KEY
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_PORT
+      - POSTGRES_HOST
+      - ALLOWED_HOSTS
+      - DEBUG
+      - DJANGO_LOG_LEVEL
+      - CELERY_BROKER_URL
+      - CELERY_RESULT_BACKEND
+      - MEDIA_URL
+      - STATIC_URL
+
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - 5423:5432
+    volumes:
+      - ./persistent_data/pg_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+
+  redis:
+    image: "redis:6.2-buster"
+    restart: always
+
+  proxy:
+    build: 
+      context: ./proxy
+    restart: always
+    volumes:
+      - ./persistent_data/media:/var/lib/media
+      - ./persistent_data/static:/var/lib/static
+      - ./persistent_data/log/nginx:/var/log/nginx/
+    ports:
+      - 80:80
