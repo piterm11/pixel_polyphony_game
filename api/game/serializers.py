@@ -42,22 +42,34 @@ class InstrumentSerializer(ModelSerializer):
         fields = ['id', 'name']
 
 
-class PlayerSerializer(ModelSerializer):
-    """Basic player serializer."""
-
-    instrument = InstrumentSerializer()
+class ShowPlayerSerializer(ModelSerializer):
+    """Show player serializer."""
 
     class Meta:
         model = Player
-        fields = ['name', 'want_play', 'instrument']
+        fields = ['id', 'name', 'want_play', 'instrument']
 
-    # def update(self, instance, validated_data):
-    #     print 'this - here'
-    #     demo = Demo.objects.get(pk=instance.id)
-    #     Demo.objects.filter(pk=instance.id)\
-    #                        .update(**validated_data)
-    #     return demo
+    def to_representation(self, instance):
+        rep = super(ShowPlayerSerializer, self).to_representation(instance)
+        if instance.instrument:
+            rep['instrument'] = instance.instrument.name
+        return rep
 
+class UpdatePlayerSerializer(serializers.Serializer):
+    """Update player serializer."""
+
+    id = serializers.IntegerField(min_value=1)
+    name = serializers.CharField(max_length=60)
+    want_play = serializers.BooleanField()
+    instrument = serializers.CharField(allow_null=True)
+
+    def validate_instrument(self, instrument):
+        if instrument:
+            instrument_in_db = Instrument.objects.filter(name__iexact=instrument).first()
+            if not instrument_in_db:
+                raise ValidationError(["Invalid instrument name passed"])
+            return instrument_in_db
+        return instrument
 
 class LobbyPlayerSerializer(ModelSerializer):
     """Serializer for player in lobby view."""
@@ -75,8 +87,6 @@ class LobbyPlayerSerializer(ModelSerializer):
         fields = ['code', 'in_game', 'player', 'competitors',
             'available_instruments', 'confirmed_players', 'all_players']
 
-# not sure if instance= is needed in serializers
-
     def get_code(self, player):
         return player.lobby.code
 
@@ -84,13 +94,13 @@ class LobbyPlayerSerializer(ModelSerializer):
         return player.lobby.in_game
 
     def get_player(self, player):
-        return PlayerSerializer(player).data
+        return ShowPlayerSerializer(player).data
 
     def get_competitors(self, player):
         lobby = player.lobby
-        competitors = list(lobby.players.all())
+        competitors = list(lobby.players.exclude().all())
         competitors.remove(player)
-        return PlayerSerializer(competitors, many=True).data
+        return ShowPlayerSerializer(competitors, many=True).data
 
     def get_available_instruments(self, player):
         available_instruments = list(Instrument.objects.all())
@@ -98,12 +108,12 @@ class LobbyPlayerSerializer(ModelSerializer):
         for player in lobby.players.all():
             if player.instrument in available_instruments:
                 available_instruments.remove(player.instrument)
-        return InstrumentSerializer(available_instruments, many=True).data
+        return [instrument.name for instrument in available_instruments]
 
     def get_confirmed_players(self, player):
         lobby = player.lobby
-        return len(lobby.players.filter(want_play=True).all())
+        return len(lobby.players.filter(want_play=True, active=True).all())
 
     def get_all_players(self, player):
         lobby = player.lobby
-        return len(lobby.players.all())
+        return len(lobby.players.filter(active=True).all())
