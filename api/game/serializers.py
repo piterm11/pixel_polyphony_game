@@ -15,7 +15,7 @@ class JoinGameSerializer(ModelSerializer):
 
     class Meta:
         model = Player
-        fields = ['name', 'code']
+        fields = ["name", "code"]
 
     def validate_code(self, code):
         """Validate lobby code. Create a new lobby when there is no lobby assigned to code."""
@@ -39,7 +39,7 @@ class InstrumentSerializer(ModelSerializer):
 
     class Meta:
         model = Instrument
-        fields = ['id', 'name']
+        fields = ["id", "name"]
 
 
 class ShowPlayerSerializer(ModelSerializer):
@@ -47,13 +47,14 @@ class ShowPlayerSerializer(ModelSerializer):
 
     class Meta:
         model = Player
-        fields = ['id', 'name', 'want_play', 'instrument']
+        fields = ["id", "name", "want_play", "instrument"]
 
     def to_representation(self, instance):
         rep = super(ShowPlayerSerializer, self).to_representation(instance)
         if instance.instrument:
-            rep['instrument'] = instance.instrument.name
+            rep["instrument"] = instance.instrument.name
         return rep
+
 
 class UpdatePlayerSerializer(serializers.Serializer):
     """Update player serializer."""
@@ -65,17 +66,20 @@ class UpdatePlayerSerializer(serializers.Serializer):
 
     def validate_instrument(self, instrument):
         if instrument:
-            instrument_in_db = Instrument.objects.filter(name__iexact=instrument).first()
+            instrument_in_db = Instrument.objects.filter(
+                name__iexact=instrument
+            ).first()
             if not instrument_in_db:
                 raise ValidationError(["Invalid instrument name passed"])
             return instrument_in_db
         return instrument
 
+
 class LobbyPlayerSerializer(ModelSerializer):
     """Serializer for player in lobby view."""
 
     code = serializers.SerializerMethodField()
-    in_game = serializers.SerializerMethodField()
+    game_number = serializers.SerializerMethodField()
     player = serializers.SerializerMethodField()
     competitors = serializers.SerializerMethodField()
     available_instruments = serializers.SerializerMethodField()
@@ -84,14 +88,21 @@ class LobbyPlayerSerializer(ModelSerializer):
 
     class Meta:
         model = Player
-        fields = ['code', 'in_game', 'player', 'competitors',
-            'available_instruments', 'confirmed_players', 'all_players']
+        fields = [
+            "code",
+            "game_number",
+            "player",
+            "competitors",
+            "available_instruments",
+            "confirmed_players",
+            "all_players",
+        ]
 
     def get_code(self, player):
         return player.lobby.code
 
-    def get_in_game(self, player):
-        return player.lobby.in_game
+    def get_game_number(self, player):
+        return player.lobby.game_number
 
     def get_player(self, player):
         return ShowPlayerSerializer(player).data
