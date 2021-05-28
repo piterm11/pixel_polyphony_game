@@ -26,7 +26,6 @@ class Game(models.Model):
     date_start = models.DateTimeField(default=create_start_game_datetime)
     date_end = models.DateTimeField(default=create_end_game_datetime)
     lobby = models.ForeignKey(Lobby, on_delete=models.PROTECT, related_name='games')
-    #players = models.ManyToManyField(Player, related_name='games')
 
 class Tone(models.Model):
     name = models.CharField(max_length=6, unique=True)

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Lobby, Player
-from .serializers import JoinGameSerializer, LobbySerializer
+from .serializers import JoinGameSerializer, LobbyPlayerSerializer, PlayerSerializer
 
 
 class JoinGameView(APIView):
@@ -21,13 +21,28 @@ class JoinGameView(APIView):
             player = Player(name=join_serializer.validated_data.get('name'))
             player.lobby = lobby
             player.save()
-            return Response({"detail": "super"}, status=status.HTTP_200_OK)
+            return Response(LobbyPlayerSerializer(player).data, status=status.HTTP_200_OK)
 
 
 class LobbyView(APIView):
-    """Handle requests related to user in lobby."""
+    """Handle requests related to player in lobby."""
 
-    def get(self, request):
-        pass
+    def get(self, request, player_id):
+        player = Player.objects.filter(id=player_id).first()
+        if not player:
+            return Response({"detail": [f'No player with this id']}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(LobbyPlayerSerializer(player).data, status=status.HTTP_200_OK)
 
-    
+
+class PlayerView(APIView):
+    """Handle requests related to player state."""
+
+    def get(self, request, player_id):
+        player = Player.objects.filter(id=player_id).first()
+        if not player:
+            return Response({"detail": [f'No player with this id']}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+        return Response(PlayerSerializer(player, data=request.data).data, status=status.HTTP_200_OK)
+
