@@ -42,7 +42,7 @@ RUN poetry install
 
 WORKDIR /app/
 EXPOSE 8000
-CMD ["uvicorn", "--reload", "--host", "0.0.0.0", "--reload", "core.asgi:application"]
+CMD ["daphne", "--bind", "0.0.0.0", "core.asgi:application"]
 
 
 # production version
