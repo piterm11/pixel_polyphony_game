@@ -21,7 +21,7 @@ class JoinGameView(APIView):
             lobby = Lobby.objects.filter(
                 code__iexact=join_serializer.validated_data.get("code")
             ).first()
-            for player in lobby.players.all():
+            for player in lobby.players.filter(active=True).all():
                 if player.name == join_serializer.validated_data.get("name"):
                     return Response(
                         {

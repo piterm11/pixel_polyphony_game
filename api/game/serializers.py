@@ -28,7 +28,7 @@ class JoinGameSerializer(ModelSerializer):
         if not lobby:
             lobby = Lobby(code=code.upper())
             lobby.save()
-        if len(lobby.players.all()) > 4:
+        if len(lobby.players.filter(active=True).all()) > 4:
             raise ValidationError(["Lobby is full. Create a new one"])
 
         return code.upper()
@@ -109,14 +109,14 @@ class LobbyPlayerSerializer(ModelSerializer):
 
     def get_competitors(self, player):
         lobby = player.lobby
-        competitors = list(lobby.players.exclude().all())
+        competitors = list(lobby.players.all())
         competitors.remove(player)
         return ShowPlayerSerializer(competitors, many=True).data
 
     def get_available_instruments(self, player):
         available_instruments = list(Instrument.objects.all())
         lobby = player.lobby
-        for player in lobby.players.all():
+        for player in lobby.players.filter(active=True).all():
             if player.instrument in available_instruments:
                 available_instruments.remove(player.instrument)
         return [instrument.name for instrument in available_instruments]
