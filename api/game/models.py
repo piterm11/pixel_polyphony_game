@@ -46,6 +46,7 @@ class Player(models.Model):
 class Game(models.Model):
     date_start = models.DateTimeField(default=create_start_game_datetime)
     date_end = models.DateTimeField(default=create_end_game_datetime)
+    result = models.JSONField(null=True)
     lobby = models.ForeignKey(Lobby, on_delete=models.PROTECT, related_name="games")
 
     def __str__(self):

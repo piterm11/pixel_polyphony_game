@@ -2,10 +2,11 @@ from django.db import models
 from django.db.models import fields
 from game.models import Lobby
 from django.core.exceptions import ValidationError
+from django.utils.timezone import activate, now
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from .models import Instrument, Lobby, Player
+from .models import Game, Instrument, Lobby, Player
 
 
 class JoinGameSerializer(ModelSerializer):
@@ -81,7 +82,7 @@ class LobbyPlayerSerializer(ModelSerializer):
     code = serializers.SerializerMethodField()
     game_number = serializers.SerializerMethodField()
     player = serializers.SerializerMethodField()
-    competitors = serializers.SerializerMethodField()
+    team = serializers.SerializerMethodField()
     available_instruments = serializers.SerializerMethodField()
     confirmed_players = serializers.SerializerMethodField()
     all_players = serializers.SerializerMethodField()
@@ -92,7 +93,7 @@ class LobbyPlayerSerializer(ModelSerializer):
             "code",
             "game_number",
             "player",
-            "competitors",
+            "team",
             "available_instruments",
             "confirmed_players",
             "all_players",
@@ -107,11 +108,11 @@ class LobbyPlayerSerializer(ModelSerializer):
     def get_player(self, player):
         return ShowPlayerSerializer(player).data
 
-    def get_competitors(self, player):
+    def get_team(self, player):
         lobby = player.lobby
-        competitors = list(lobby.players.all())
-        competitors.remove(player)
-        return ShowPlayerSerializer(competitors, many=True).data
+        team = list(lobby.players.filter(active=True).all())
+        team.remove(player)
+        return ShowPlayerSerializer(team, many=True).data
 
     def get_available_instruments(self, player):
         available_instruments = list(Instrument.objects.all())
@@ -128,3 +129,66 @@ class LobbyPlayerSerializer(ModelSerializer):
     def get_all_players(self, player):
         lobby = player.lobby
         return len(lobby.players.filter(active=True).all())
+
+
+class ShowGamePlayerSerializer(ModelSerializer):
+    """Serializer for player game view."""
+
+    game_number = serializers.SerializerMethodField()
+    date_start = serializers.SerializerMethodField()
+    date_end = serializers.SerializerMethodField()
+    player = serializers.SerializerMethodField()
+    team = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Player
+        fields = ["game_number", "date_start", "date_end", "player", "team"]
+
+    def get_game_number(self, player):
+        return player.lobby.game_number
+
+    def get_date_start(self, player):
+        return player.lobby.games.filter(date_end__gt=now()).first().date_start
+
+    def get_date_end(self, player):
+        return player.lobby.games.filter(date_end__gt=now()).first().date_end
+
+    def get_player(self, player):
+        return ShowPlayerSerializer(player).data
+
+    def get_team(self, player):
+        lobby = player.lobby
+        team = list(lobby.players.filter(active=True).all())
+        team.remove(player)
+        return ShowPlayerSerializer(team, many=True).data
+
+
+# TODO
+# problem when someone will want to check the result later e.g. when team
+# is preparing to the next game
+# incorrect players and isntruments can be displayed
+# needed another relation for game players
+
+# TODO
+# check how looks the representation of JSONfield
+class ShowGameResultSerializer(ModelSerializer):
+    """Serializer for game result view."""
+
+    game_number = serializers.SerializerMethodField()
+    players = serializers.SerializerMethodField()
+    result = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Game
+        fields = ["game_number", "date_start", "date_end", "players", "result"]
+
+    def get_game_number(self, game):
+        return game.id
+
+    def get_players(self, game):
+        lobby = game.lobby
+        team = list(lobby.players.filter(active=True).all())
+        return ShowPlayerSerializer(team, many=True).data
+
+    def get_result(self, game):
+        return game.result
