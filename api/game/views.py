@@ -12,6 +12,7 @@ from .serializers import (
     ShowPlayerSerializer,
     UpdatePlayerSerializer,
 )
+from .utils import create_list_of_hits
 
 
 class JoinGameView(APIView):
@@ -157,12 +158,10 @@ class PlayerView(APIView):
             player.lobby.game_number = game.id
             player.lobby.save()
 
-    # TODO add conversion of hits to json or other type
     def check_end_game(self, player):
         """Check if current game ended and prepare players for a new round."""
         if player.lobby.game_number:
-            game = player.lobby.games.filter(
-                id=player.lobby.game_number).first()
+            game = player.lobby.games.filter(id=player.lobby.game_number).first()
             if game.date_end < now():
                 player.lobby.game_number = None
                 player.lobby.save()
@@ -170,15 +169,17 @@ class PlayerView(APIView):
                     player.instrument = None
                     player.want_play = False
                     player.save()
+                game.result = create_list_of_hits(game.hits.all().order_by("hit_date"))
+                game.save()
 
     def check_all_players_ended(self, player):
         """Check if all artists ended playing.
-        
+
         Prepare game result.
         Prepare players for a new round.
         """
         if not player.lobby.players.filter(active=True, want_play=True).first():
-            game  = player.lobby.games.filter(id=player.lobby.game_number).first()
+            game = player.lobby.games.filter(id=player.lobby.game_number).first()
             game.date_end = now()
             game.save()
             self.check_end_game(player)
@@ -210,7 +211,6 @@ class GameView(APIView):
             ShowGamePlayerSerializer(player).data, status=status.HTTP_200_OK
         )
 
-    # TODO add conversion of hits to json or other structure
     def end_game(self, game):
         """Update lobby state in case game has ended."""
         lobby = game.lobby
@@ -220,6 +220,8 @@ class GameView(APIView):
             player.instrument = None
             player.want_play = False
             player.save()
+        game.result = create_list_of_hits(game.hits.all().order_by("hit_date"))
+        game.save()
 
 
 class GameResultView(APIView):

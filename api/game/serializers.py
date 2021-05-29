@@ -1,12 +1,9 @@
-from django.db import models
-from django.db.models import fields
-from game.models import Lobby
 from django.core.exceptions import ValidationError
-from django.utils.timezone import activate, now
+from django.utils.timezone import now
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from .models import Game, Instrument, Lobby, Player
+from game.models import Game, Hit, Instrument, Lobby, Player
 
 
 class JoinGameSerializer(ModelSerializer):
@@ -148,10 +145,14 @@ class ShowGamePlayerSerializer(ModelSerializer):
         return player.lobby.game_number
 
     def get_date_start(self, player):
-        return player.lobby.games.filter(date_end__gt=now()).first().date_start
+        return (
+            player.lobby.games.filter(date_end__gt=now()).first().date_start.isoformat()
+        )
 
     def get_date_end(self, player):
-        return player.lobby.games.filter(date_end__gt=now()).first().date_end
+        return (
+            player.lobby.games.filter(date_end__gt=now()).first().date_end.isoformat()
+        )
 
     def get_player(self, player):
         return ShowPlayerSerializer(player).data
@@ -168,9 +169,6 @@ class ShowGamePlayerSerializer(ModelSerializer):
 # is preparing to the next game
 # incorrect players and isntruments can be displayed
 # needed another relation for game players
-
-# TODO
-# check how looks the representation of JSONfield
 class ShowGameResultSerializer(ModelSerializer):
     """Serializer for game result view."""
 
