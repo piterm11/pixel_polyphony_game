@@ -11,7 +11,7 @@ from .utils import (
 
 class Lobby(models.Model):
     code = models.CharField(max_length=6, unique=True, default=create_short_uuid)
-    creation_date = models.DateTimeField(auto_now_add=True)
+    creation_date = models.DateTimeField(default=now)
     game_number = models.PositiveIntegerField(null=True)
 
     def __str__(self):
@@ -27,7 +27,7 @@ class Instrument(models.Model):
 
 class Player(models.Model):
     name = models.CharField(max_length=60, unique=False)
-    join_date = models.DateTimeField(auto_now_add=True)
+    join_date = models.DateTimeField(default=now)
     want_play = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     lobby = models.ForeignKey(Lobby, on_delete=models.PROTECT, related_name="players")
