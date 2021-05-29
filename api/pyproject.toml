@@ -17,6 +17,7 @@ shortuuid = "^1.0.1"
 djangorestframework = "^3.12.4"
 channels = "^3.0.3"
 djangochannelsrestframework = "^0.2.2"
+channels-redis = "^3.2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"
