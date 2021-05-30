@@ -1,5 +1,6 @@
 import json
 import logging
+
 # from channels import Group
 # from channels.sessions import channel_session
 
@@ -125,6 +126,8 @@ class HitConsumer(AsyncConsumer):
     AVAILABLE_TONES = ["C", "D", "E", "F", "G", "A", "B"]
 
     async def websocket_connect(self, event):
+        """Connect new player to the proper group or create a new websocket group."""
+
         print("connected", event)
 
         try:
@@ -156,6 +159,7 @@ class HitConsumer(AsyncConsumer):
         )
 
     async def websocket_receive(self, event):
+        """Handle message sent by player and propagate the all players in websocket group."""
         print("receive", event)
 
         data = event.get("text", None)
@@ -187,11 +191,13 @@ class HitConsumer(AsyncConsumer):
         await self.channel_layer.group_send(self.game_room, new_message)
 
     async def game_message(self, event):
+        """Send message with hit info."""
         # send the actual message
         await self.send({"type": "websocket.send", "text": event["text"]})
 
     @database_sync_to_async
     def add_hit(self, instrument_name, tone):
+        """Add new game hit asynchronously."""
         instrument = Instrument.objects.filter(name__iexact=instrument_name).first()
         if not instrument:
             return None
@@ -204,7 +210,9 @@ class HitConsumer(AsyncConsumer):
 
     @sync_to_async
     def log_error(self, message):
+        """Log errors and info asynchronously."""
         log.debug(message)
 
     async def websocket_disconnect(self, event):
+        """Close player websocket connection."""
         print("disconnected", event)
