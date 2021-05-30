@@ -52,21 +52,11 @@ class Game(models.Model):
     def __str__(self):
         return f"{self.id} {self.lobby}"
 
-
-class Tone(models.Model):
-    name = models.CharField(max_length=6, unique=True)
-    value = models.PositiveSmallIntegerField()
-
-    def __str__(self):
-        return self.name
-
-
 class Hit(models.Model):
     hit_date = models.DateTimeField(default=now)
-    player = models.ForeignKey(Player, on_delete=PROTECT, related_name="hits")
     instrument = models.ForeignKey(Instrument, on_delete=PROTECT, related_name="hits")
-    tone = models.ForeignKey(Tone, on_delete=models.PROTECT, related_name="hits")
+    tone = models.CharField(max_length=1, default="A")
     game = models.ForeignKey(Game, on_delete=models.PROTECT, related_name="hits")
 
     def __str__(self):
-        return f"{self.player} {self.game} {self.tone}"
+        return f"{self.tone} {self.game}"

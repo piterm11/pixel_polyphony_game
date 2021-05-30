@@ -6,7 +6,7 @@ from channels.sessions import channel_session
 
 from django.utils.timezone import now
 
-from .models import Game
+from .models import Game, Instrument, Hit
 
 
 log = logging.getLogger("django")
@@ -20,6 +20,7 @@ def ws_connect(message):
     # form /api/hit/{game_number}/, and finds a Game if the message path is applicable,
     # and if the Game exists. Otherwise, bails (meaning this is a some othersort
     # of websocket). So, this is effectively a version of _get_object_or_404.
+
     try:
         api, prefix, game_number = message["path"].decode("ascii").strip("/").split("/")
         if prefix != "hit" or api != "api":
@@ -109,5 +110,125 @@ def ws_disconnect(message):
         Group("game-" + game_number, channel_layer=message.channel_layer).discard(
             message.reply_channel
         )
-    except (KeyError, Game.DoesNotExist):
+    except (AsyncConsumer):
         pass
+
+
+
+
+# TODO do we need await call with logger? Do we need to add sync_to_async?
+
+from asgiref.sync import sync_to_async
+import json
+
+from channels.consumer import AsyncConsumer
+from channels.db import database_sync_to_async
+
+
+class EchoConsumer(AsyncConsumer):
+
+    AVAILABLE_TONES = ["C", "D", "E", "F", "G", "A", "B"]
+
+    async def websocket_connect(self, event):
+        print("connected", event)
+
+        try:
+            game_number = int(self.scope['url_route']['kwargs']['game_number'])
+        except (KeyError, ValueError):
+            await log.debug(
+                "Invalid or missing game number"
+            )
+            return
+        try:
+            game = Game.objects.get(id=game_number)
+        except Game.DoesNotExist:
+            await log.debug(
+                f"received message, but game does not exist game_number={game_number}"
+            )
+            return
+        if game.date_end < now():
+            await log.debug(
+                "Game ended already"
+            )
+            return
+        game_name = f"game-{game_number}"
+        self.game_room = game_name
+        self.game_number = game_number
+        self.channel_layer.group_add(
+            game_name,
+            self.channel_name
+        )
+        await self.send({
+            "type": "websocket.accept",
+        })
+        await log.debug(
+            f"New websocket player connected to the game '{game_name}'"
+        )
+
+    async def websocket_receive(self, event):
+        print("receive", event)
+        data = event.get('text', None)
+        if not data:
+            await log.debug(
+                "No data in the message"
+            )
+            return
+        data = json.loads(data)
+        try:
+            instrument_name = data.get('instrument')
+            tone = data.get('tone')
+        except KeyError:
+            await log.debug(
+                "Missing argument 'instrument' in the message"
+            )
+            return
+        try:
+            tone = data.get('tone')
+        except KeyError:
+            await log.debug(
+                "Missing argument 'tone' in the message"
+            )
+            return
+        hit = await self.add_hit(instrument_name, tone)
+        if not hit:
+            await log.debug(
+                "Cannot save the hit. Game ended or invalid message was sent."
+            )
+            return
+
+        new_message = {
+            "type": "game_message",
+            "text": json.dumps({"instrument": instrument_name, "tone": tone})
+        }
+
+        # broadcast the event message
+        await self.channel_layer.group_send(
+            self.game_room,
+            new_message
+        )
+
+    async def game_message(self, event):
+        # send the actual message
+        await self.send({
+            "type": "websocket.send",
+            "text": event["text"]
+        })
+
+    @database_sync_to_async
+    def add_hit(self, instrument_name, tone):
+        instrument = Instrument.objects.filter(name__iexact=instrument_name).first()
+        if not instrument:
+            return None
+        game = Game.objects.filter(id=self.game_number).first()
+        if not game or game.date_end < now():
+            return None
+        if tone.upper() not in self.AVAILABLE_TONES:
+            return None
+        return Hit.objects.create(tone=tone, instrument=instrument, game=game)
+
+    async def websocket_disconnect(self, event):
+        print("disconnected", event)
+
+    # @sync_to_async
+    # def log_error(self, message):
+    #     log.debug(message)

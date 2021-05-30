@@ -29,6 +29,10 @@ def create_list_of_hits(hit_list: QuerySet) -> List:
     new_hits_list = []
     for hit in hit_list:
         new_hits_list.append(
-            {"instrument": hit.instrument.name, "datetime": hit.hit_date.isoformat()}
+            {
+                "instrument": hit.instrument.name,
+                "tone": hit.tone,
+                "datetime": hit.hit_date.isoformat(),
+            }
         )
     return new_hits_list

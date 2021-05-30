@@ -87,7 +87,7 @@ TEMPLATES = [
     },
 ]
 
-ASGI_APPLICATION = "core.asgi:channel_layer"
+ASGI_APPLICATION = "core.asgi.application"
 WSGI_APPLICATION = "core.wsgi.application"
 
 # Database
