@@ -214,14 +214,15 @@ class GameView(APIView):
     def end_game(self, game):
         """Update lobby state in case game has ended."""
         lobby = game.lobby
-        lobby.game_number = None
-        lobby.save()
-        for player in lobby.players.filter(active=True).all():
-            player.instrument = None
-            player.want_play = False
-            player.save()
-        game.result = create_list_of_hits(game.hits.all().order_by("hit_date"))
-        game.save()
+        if lobby.game_number:
+            lobby.game_number = None
+            lobby.save()
+            for player in lobby.players.filter(active=True).all():
+                player.instrument = None
+                player.want_play = False
+                player.save()
+            game.result = create_list_of_hits(game.hits.all().order_by("hit_date"))
+            game.save()
 
 
 class GameResultView(APIView):
@@ -237,6 +238,11 @@ class GameResultView(APIView):
         if game.date_end > now():
             return Response(
                 {"detail": [f"Artists are still playing. Check later"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not game.result:
+            return Response(
+                {"detail": [f"Game result hasn't prepared yet"]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response(ShowGameResultSerializer(game).data, status=status.HTTP_200_OK)

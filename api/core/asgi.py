@@ -19,6 +19,8 @@
 
 # TODO check regex
 
+import django
+django.setup()
 
 import os
 
@@ -26,14 +28,12 @@ from channels.auth import AuthMiddlewareStack
 from channels.http import AsgiHandler
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
-import django
 from django.conf.urls import url
 
-from .consumers import HitConsumer
+from game.consumers import HitConsumer
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
-django.setup()
 
 application = ProtocolTypeRouter({
     "http": AsgiHandler(),

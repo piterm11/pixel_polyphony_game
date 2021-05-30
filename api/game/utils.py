@@ -35,4 +35,5 @@ def create_list_of_hits(hit_list: QuerySet) -> List:
                 "datetime": hit.hit_date.isoformat(),
             }
         )
+    hit_list.delete()
     return new_hits_list

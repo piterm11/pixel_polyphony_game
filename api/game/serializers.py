@@ -165,7 +165,7 @@ class ShowGamePlayerSerializer(ModelSerializer):
 
 
 # TODO
-# problem when someone will want to check the result later e.g. when team
+# when someone will want to check the result later e.g. when team
 # is preparing to the next game
 # incorrect players and isntruments can be displayed
 # needed another relation for game players
