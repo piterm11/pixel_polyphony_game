@@ -42,7 +42,8 @@ RUN poetry install
 
 WORKDIR /app/
 EXPOSE 8000
-CMD ["uvicorn", "--reload", "--host", "0.0.0.0", "--reload", "core.asgi:application"]
+CMD ["sh", "-c", "daphne --bind 0.0.0.0 core.asgi:application && python manage.py runworker -v2"]
+
 
 
 # production version

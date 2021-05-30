@@ -7,9 +7,12 @@ from .models import Game, Lobby, Player
 from .serializers import (
     JoinGameSerializer,
     LobbyPlayerSerializer,
+    ShowGamePlayerSerializer,
+    ShowGameResultSerializer,
     ShowPlayerSerializer,
     UpdatePlayerSerializer,
 )
+from .utils import create_list_of_hits
 
 
 class JoinGameView(APIView):
@@ -68,7 +71,6 @@ class PlayerView(APIView):
                 {"detail": [f"Lobby in game. Try later"]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
         return Response(ShowPlayerSerializer(player).data, status=status.HTTP_200_OK)
 
     def put(self, request, player_id):
@@ -79,13 +81,21 @@ class PlayerView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         self.check_end_game(player)
-        if player.lobby.game_number:
-            return Response(
-                {"detail": [f"Lobby in game. Try later"]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
         serializer = UpdatePlayerSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
+            player.want_play = serializer.validated_data.get("want_play")
+            player.save()
+            if player.lobby.game_number:
+                if player.want_play == False:
+                    self.check_all_players_ended(player)
+                    return Response(
+                        ShowPlayerSerializer(player).data, status=status.HTTP_200_OK
+                    )
+                else:
+                    return Response(
+                        {"detail": [f"Lobby in game. Try later"]},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
             if player.id != serializer.validated_data.get("id"):
                 return Response(
                     {"detail": [f"Not matching player ids passed"]},
@@ -114,7 +124,6 @@ class PlayerView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             player.name = name
-            player.want_play = serializer.validated_data.get("want_play")
             player.save()
             if player.want_play:
                 self.check_run_game(player)
@@ -152,12 +161,88 @@ class PlayerView(APIView):
     def check_end_game(self, player):
         """Check if current game ended and prepare players for a new round."""
         if player.lobby.game_number:
-            if not Game.objects.filter(
-                id=player.lobby.game_number, date_end__gt=now()
-            ).first():
+            game = player.lobby.games.filter(id=player.lobby.game_number).first()
+            if game.date_end < now():
                 player.lobby.game_number = None
                 player.lobby.save()
                 for player in player.lobby.players.filter(active=True).all():
                     player.instrument = None
                     player.want_play = False
                     player.save()
+                game.result = create_list_of_hits(game.hits.all().order_by("hit_date"))
+                game.save()
+
+    def check_all_players_ended(self, player):
+        """Check if all artists ended playing.
+
+        Prepare game result.
+        Prepare players for a new round.
+        """
+        if not player.lobby.players.filter(active=True, want_play=True).first():
+            game = player.lobby.games.filter(id=player.lobby.game_number).first()
+            game.date_end = now()
+            game.save()
+            self.check_end_game(player)
+
+
+class GameView(APIView):
+    """Handle requests related to game view."""
+
+    def get(self, request, game_number, player_id):
+        game = Game.objects.filter(id=game_number).first()
+        if not game:
+            return Response(
+                {"detail": [f"No game with this id"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        player = Player.objects.filter(id=player_id, active=True).first()
+        if not player:
+            return Response(
+                {"detail": [f"No player with this id"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if game.date_end < now():
+            self.end_game(game)
+            return Response(
+                {"detail": [f"Game ended already. Check results"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(
+            ShowGamePlayerSerializer(player).data, status=status.HTTP_200_OK
+        )
+
+    def end_game(self, game):
+        """Update lobby state in case game has ended."""
+        lobby = game.lobby
+        if lobby.game_number:
+            lobby.game_number = None
+            lobby.save()
+            for player in lobby.players.filter(active=True).all():
+                player.instrument = None
+                player.want_play = False
+                player.save()
+            game.result = create_list_of_hits(game.hits.all().order_by("hit_date"))
+            game.save()
+
+
+class GameResultView(APIView):
+    """Handle requests related to game result."""
+
+    def get(self, request, game_number):
+        game = Game.objects.filter(id=game_number).first()
+        if not game:
+            return Response(
+                {"detail": [f"No game with this id"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if game.date_end > now():
+            return Response(
+                {"detail": [f"Artists are still playing. Check later"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not game.result:
+            return Response(
+                {"detail": [f"Game result hasn't prepared yet"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(ShowGameResultSerializer(game).data, status=status.HTTP_200_OK)
