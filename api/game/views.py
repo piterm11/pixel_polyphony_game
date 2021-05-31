@@ -84,18 +84,31 @@ class PlayerView(APIView):
         serializer = UpdatePlayerSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             instrument = serializer.validated_data.get("instrument")
+            if instrument:
+                if (
+                    player.lobby.players.exclude(name=player.name)
+                    .filter(instrument=instrument, active=True)
+                    .first()
+                ):
+                    return Response(
+                        {"detail": [f"Instrument is already used in this lobby"]},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            player.instrument = instrument
+            player.want_play = serializer.validated_data.get("want_play")
             if (
-                serializer.validated_data.get("want_play") == True
-                and player.instrument is None and instrument is None
+                player.want_play == True
+                and player.instrument is None
             ):
                 return Response(
                     {"detail": [f"Player has to choose instrument first"]},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            player.want_play = serializer.validated_data.get("want_play")
             player.save()
             if player.lobby.game_number:
                 if player.want_play == False:
+                    player.instrument = None
+                    player.save()
                     self.check_all_players_ended(player)
                     return Response(
                         ShowPlayerSerializer(player).data, status=status.HTTP_200_OK
@@ -110,17 +123,6 @@ class PlayerView(APIView):
                     {"detail": [f"Not matching player ids passed"]},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            if instrument:
-                if (
-                    player.lobby.players.exclude(name=player.name)
-                    .filter(instrument=instrument, active=True)
-                    .first()
-                ):
-                    return Response(
-                        {"detail": [f"Instrument is already used in this lobby"]},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-            player.instrument = instrument
             name = serializer.validated_data.get("name")
             if (
                 player.lobby.players.exclude(id=player.id)
