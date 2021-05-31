@@ -83,6 +83,15 @@ class PlayerView(APIView):
         self.check_end_game(player)
         serializer = UpdatePlayerSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
+            instrument = serializer.validated_data.get("instrument")
+            if (
+                serializer.validated_data.get("want_play") == True
+                and player.instrument is None and instrument is None
+            ):
+                return Response(
+                    {"detail": [f"Player has to choose instrument first"]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             player.want_play = serializer.validated_data.get("want_play")
             player.save()
             if player.lobby.game_number:
@@ -101,7 +110,6 @@ class PlayerView(APIView):
                     {"detail": [f"Not matching player ids passed"]},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            instrument = serializer.validated_data.get("instrument")
             if instrument:
                 if (
                     player.lobby.players.exclude(name=player.name)
