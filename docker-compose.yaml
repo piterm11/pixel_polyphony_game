@@ -36,6 +36,20 @@ services:
       - MEDIA_URL
       - STATIC_URL
 
+  frontend:
+    image: pixel_polyphony_frontend
+    build:
+      context: ./frontend
+    restart: always
+    ports:
+      - 3000:3000
+    links:
+      - api
+    depends_on:
+      - api
+    environment: 
+      - API_BASE_URL
+
   db:
     image: postgres
     restart: always

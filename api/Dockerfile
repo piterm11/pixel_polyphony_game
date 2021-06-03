@@ -55,4 +55,4 @@ COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
 COPY . /app/
 WORKDIR /app
 EXPOSE 8000
-CMD ["gunicorn", "-b", "0.0.0.0", "-k", "uvicorn.workers.UvicornWorker", "core.asgi:application"]
+CMD ["sh", "-c", "daphne --bind 0.0.0.0 core.asgi:application && python manage.py runworker -v2"]

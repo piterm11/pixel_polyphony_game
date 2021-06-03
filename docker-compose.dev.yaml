@@ -8,6 +8,14 @@ services:
     volumes: 
       - ./api:/app
 
+  frontend:
+    build: 
+      target: development
+    restart: "no"
+    volumes: 
+      - ./frontend:/app
+      - /app/node_modules
+
   proxy:
     ports:
       - 8080:80
