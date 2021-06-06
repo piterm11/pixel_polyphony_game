@@ -1,24 +1,16 @@
 import logo from "./logo.svg";
 import "./App.css";
-
+import { Route, IndexRoute } from 'react-router';
+import App2 from './App2';
 function App() {
-	return (
-		<div className="App">
-			<header className="App-header">
-				<img src={logo} className="App-logo" alt="logo" />
-				<p>
-					Edit <code>src/App.js</code> and save to reload. D
-				</p>
-				<a
-					className="App-link"
-					href="app2"
-					rel="noopener noreferrer"
-				>
-					START
-				</a>
-			</header>
-		</div>
-	);
+    return (
+        <div className="App">
+            <header className="App-header">
+				<h1 className = "xd">Pixel Polyphony</h1>
+                <a href="App2" className="App-link">xD</a>
+            </header>
+        </div>
+    );
 }
 
 export default App;

@@ -12,7 +12,15 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
-
+@font-face {
+  font-family: "Pixel";
+  font-style: normal;
+  font-weight: normal;
+  src: url("fonts/PixelFont.otf") format("opentype");
+}
+.xd {
+  font-family: "Pixel";
+}
 .App-header {
   background: url("grafika/background.gif");
   background-size:cover;
