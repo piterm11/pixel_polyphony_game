@@ -16,21 +16,29 @@
   font-family: "Pixel";
   font-style: normal;
   font-weight: normal;
-  src: url("fonts/PixelFont.otf") format("opentype");
+  src: url("fonts/HelvetiPixel.ttf");
 }
 .xd {
   font-family: "Pixel";
+  text-shadow: 2px 4px rgba(0, 0, 0, 0.5);
+  position: absolute;
+  top: 0;
+  width: 100%;
+  text-align: center;
+  color: white;
+  font-size: 72px;
+}
+.xd h1 {
+  letter-spacing: 5px;
+  font-weight: 400;
+  margin: 36px;
+  padding: 0;
 }
 .App-header {
   background: url("grafika/background.gif");
-  background-size:cover;
+  background-size: cover;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  filter: brightness(80%);
 }
 
 .App-link {

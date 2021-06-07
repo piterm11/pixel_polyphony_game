@@ -1,6 +1,6 @@
 import logo from "./logo.svg";
 import "./App.css";
-function App2() {
+function Join() {
 	return (
 		<div className="App">
 			<header className="App-header">
@@ -19,4 +19,4 @@ function App2() {
 	);
 }
 
-export default App2;
+export default Join;

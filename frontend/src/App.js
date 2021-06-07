@@ -1,15 +1,18 @@
-import logo from "./logo.svg";
+import React from 'react'
 import "./App.css";
-import { Route, IndexRoute } from 'react-router';
-import App2 from './App2';
+import {BrowserRouter as Router, Switch, Route} from 'react-router-dom'
+import Home from './Home';
+import Join from './Join';
+import Lobby from './Lobby';
 function App() {
     return (
-        <div className="App">
-            <header className="App-header">
-				<h1 className = "xd">Pixel Polyphony</h1>
-                <a href="App2" className="App-link">xD</a>
-            </header>
-        </div>
+        <Router>
+            <Switch>
+                <Route exact path="/" component= {Home} />
+                <Route exact path="/join" component = {Join}/>
+                <Route exact path="/lobby" component = {Lobby}/>
+            </Switch>
+        </Router>
     );
 }
 
