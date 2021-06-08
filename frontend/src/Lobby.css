@@ -1,0 +1,35 @@
+
+.users{
+    grid-area: users;
+    background-color: #8bb561;
+    border-bottom: 10px solid black;
+    padding: 10px;
+}
+.instruments{
+    grid-area: instruments;
+    background-color: transparent;
+    border-right: 10px solid black;
+    padding: 20px;
+}
+.ready{
+    grid-area: ready;
+    background-color: #8c8c8c;
+    text-align: right;
+    padding: 10px;
+    position: relative;
+}
+
+.container {
+    font-size: 64px;
+    text-align: left;
+    color: white;
+    height: 100vh;
+    width: 100%;
+    display: grid;
+    grid-template-areas:
+    'instruments instruments instruments users'
+    'instruments instruments instruments users'
+    'instruments instruments instruments users'
+    'instruments instruments instruments users'
+    'instruments instruments instruments ready';
+}

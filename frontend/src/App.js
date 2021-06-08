@@ -10,7 +10,7 @@ function App() {
             <Switch>
                 <Route exact path="/" component= {Home} />
                 <Route exact path="/join" component = {Join}/>
-                <Route exact path="/lobby" component = {Lobby}/>
+                <Route path="/lobby/:id" component = {Lobby}/>
             </Switch>
         </Router>
     );

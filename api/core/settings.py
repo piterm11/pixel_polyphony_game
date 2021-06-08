@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "channels",
     "djangochannelsrestframework",
     "game",
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -67,6 +68,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'corsheaders.middleware.CorsMiddleware'
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -169,7 +171,7 @@ DJANGO_LOG_LEVEL = get_env_value("DJANGO_LOG_LEVEL", "WARNING")
 
 CELERY_BROKER_URL = get_env_value("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = get_env_value("CELERY_RESULT_BACKEND")
-
+CORS_ORIGIN_ALLOW_ALL = True
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
