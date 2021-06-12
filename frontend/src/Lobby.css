@@ -9,7 +9,26 @@
     grid-area: instruments;
     background-color: transparent;
     border-right: 10px solid black;
-    padding: 20px;
+    padding: 2%;
+    display: grid;
+    position: relative;
+    grid-template-columns: 47% 47%;
+    grid-template-rows: 30% 30% 30%;
+    grid-row-gap: 4%;
+    grid-column-gap: 4%;
+}
+.single-instrument{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, .2);
+    border: 4px solid black;
+    border-radius: 15px;
+    position: relative;
+}
+.single-instrument-clicked{
+    border: 4px solid #f1c40f;
+    box-shadow: 0 0 15px 10px rgba(241, 196, 15, 0.7)
 }
 .ready{
     grid-area: ready;
@@ -17,8 +36,15 @@
     text-align: right;
     padding: 10px;
     position: relative;
+    cursor: pointer;
 }
-
+.deactive {
+    filter: grayscale(100%);
+    pointer-events: none;
+}
+.ready_active{
+    background-color: #636363;
+}
 .container {
     font-size: 64px;
     text-align: left;
@@ -26,10 +52,9 @@
     height: 100vh;
     width: 100%;
     display: grid;
+    grid-template-columns: 75% 25%;
+    grid-template-rows: 80% 20%;
     grid-template-areas:
-    'instruments instruments instruments users'
-    'instruments instruments instruments users'
-    'instruments instruments instruments users'
-    'instruments instruments instruments users'
-    'instruments instruments instruments ready';
+    'instruments users'
+    'instruments ready';
 }

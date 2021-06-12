@@ -30,7 +30,8 @@ function Join() {
     }
     const xd = {
         marginLeft: '20px',
-        color: 'white'
+        color: 'white',
+        cursor:'pointer'
     }
     let history = useHistory();
     const redirect_lobby = (id) => {
