@@ -7,15 +7,18 @@ import saxophone from "./graphics/saxophone.gif"
 import trumpet from "./graphics/trumpet.gif"
 import axios from 'axios'
 import React, {useState, useEffect} from 'react'
+import {useHistory} from 'react-router-dom'
+
 function Lobby({match}) {
 
 	useEffect(() =>{
 		getData()
-		setInterval(()=>{
+		const interval = setInterval(()=>{
 			getData()
 		}, 1000)
+		return () => clearInterval(interval)
 	}, [])
-
+	let history = useHistory()
 	const [lobby, setItem] = useState({
 		team: [],
 		available_instruments: [],
@@ -26,6 +29,8 @@ function Lobby({match}) {
 		console.log("Ej")
 		setItem(item.data)
 		setActive(item.data.player.want_play)
+		if (item.data.confirmed_players !== item.data.all_players) setTimer(10)
+		else setTimer(timer => timer - 1)
 		console.log(item.data)
 	}
 	const getReady = async(data) => {
@@ -111,10 +116,13 @@ const toggleCliclked5 = () => {
 			alignItems: 'flex-end'
 		}
 	}
+
+	const [timer, setTimer] = useState(10)
+
 	return (
 		<div className="App">
 			<div className="App-header">
-				<div className="container">
+				<div className="lobby-container">
 					<div className="instruments">
 						<div className = "single-instrument">
 							Lobby id: {lobby.code}<br />Nick: {lobby.player.name}
@@ -145,7 +153,7 @@ const toggleCliclked5 = () => {
 							</div>
 						</div>
 					</div>
-					<div className="users" onClick={() => console.log(instrument)}>
+					<div className="lobby-users" onClick={() => console.log(instrument)}>
 						Users:
 						
 						{
@@ -157,16 +165,21 @@ const toggleCliclked5 = () => {
 					</div>
 					<div className={`ready ${isActive ? 'ready_active' : ''}`} onClick={async () => {
 							toggleClass()
-							getReady({
-								id: match.params.id,
-								name: lobby.player.name,
-								want_play: !lobby.player.want_play,
-								instrument: lobby.player.want_play ? null : instrument
-							})
-							console.log(isActive ? instrument : null)
-							getData()
+							if (instrument === null && lobby.player.want_play === false)
+								alert("Please choose an instrument!")
+							else 
+								getReady({
+									id: match.params.id,
+									name: lobby.player.name,
+									want_play: !lobby.player.want_play,
+									instrument: lobby.player.want_play ? null : instrument
+								})
+							// console.log(isActive ? instrument : null)
+							// getData()
 						}}>
-						{lobby.confirmed_players} / {lobby.all_players}
+						{lobby.confirmed_players} / {lobby.all_players}<br />
+						{/* {timer >=0 ? timer : history.push(`/game/${match.params.id}`)} */}
+						{timer === 10 ? '' : timer >=0 ? timer : history.push(`/game/${match.params.id}`)}
 						<span style={{display: "block", position: "absolute", bottom: "30px", left: "30px", fontSize: "120px"}}>{isActive ? 'Ready' : 'Play'}</span>
 					</div>
 				</div>
