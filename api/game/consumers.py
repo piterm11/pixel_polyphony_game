@@ -47,7 +47,7 @@ class HitConsumer(AsyncConsumer):
         game_name = f"game-{game_number}"
         self.game_room = game_name
         self.game_number = game_number
-        self.channel_layer.group_add(game_name, self.channel_name)
+        await self.channel_layer.group_add(game_name, self.channel_name)
         await self.send(
             {
                 "type": "websocket.accept",
@@ -87,11 +87,12 @@ class HitConsumer(AsyncConsumer):
         }
 
         # broadcast the event message
-        await self.channel_layer.group_send(self.game_room, new_message)
 
         await self.log_error(
             f"New message sent '{new_message}'"
         )
+
+        await self.channel_layer.group_send(self.game_room, new_message)
 
     async def game_message(self, event):
         """Send message with hit info."""

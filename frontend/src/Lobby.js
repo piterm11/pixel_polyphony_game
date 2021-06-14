@@ -179,7 +179,7 @@ const toggleCliclked5 = () => {
 						}}>
 						{lobby.confirmed_players} / {lobby.all_players}<br />
 						{/* {timer >=0 ? timer : history.push(`/game/${match.params.id}`)} */}
-						{timer === 10 ? '' : timer >=0 ? timer : history.push(`/game/${match.params.id}`)}
+						{timer === 10 ? '' : timer >=0 ? timer : history.push(`/game/${lobby.game_number}-${match.params.id}`)}
 						<span style={{display: "block", position: "absolute", bottom: "30px", left: "30px", fontSize: "120px"}}>{isActive ? 'Ready' : 'Play'}</span>
 					</div>
 				</div>
