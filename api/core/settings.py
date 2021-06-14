@@ -172,6 +172,9 @@ DJANGO_LOG_LEVEL = get_env_value("DJANGO_LOG_LEVEL", "WARNING")
 CELERY_BROKER_URL = get_env_value("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = get_env_value("CELERY_RESULT_BACKEND")
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = get_env_value("CORS_ORIGIN_WHITELIST").split(" ")
+CORS_ALLOW_CREDENTIALS = bool(get_env_value("CORS_ALLOW_CREDENTIALS", 0))
+CSRF_TRUSTED_ORIGINS = get_env_value("CSRF_TRUSTED_ORIGINS").split(" ")
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

@@ -35,6 +35,9 @@ services:
       - CELERY_RESULT_BACKEND
       - MEDIA_URL
       - STATIC_URL
+      - CORS_ORIGIN_WHITELIST
+      - CSRF_TRUSTED_ORIGINS
+      - CORS_ALLOW_CREDENTIALS
 
   frontend:
     image: pixel_polyphony_frontend
