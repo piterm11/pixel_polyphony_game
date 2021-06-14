@@ -51,6 +51,7 @@
     border-left: 10px solid black;
     flex-direction: column;
     padding: 4% 0;
+    cursor: pointer;
     /* font-weight: 700; */
 }
 .note:hover {
@@ -80,7 +81,7 @@
     background-color: #fb0000;
     animation-name: rec;
     animation-duration: 1s;
-    animation-timing-function: linear;
+    animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
 }
 .timer {

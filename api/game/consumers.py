@@ -123,7 +123,7 @@ from channels.db import database_sync_to_async
 
 class HitConsumer(AsyncConsumer):
 
-    AVAILABLE_TONES = ["C", "D", "E", "F", "G", "A", "B"]
+    AVAILABLE_TONES = ["c", "D", "E", "F", "G", "A", "H", "C"]
 
     async def websocket_connect(self, event):
         """Connect new player to the proper group or create a new websocket group."""
