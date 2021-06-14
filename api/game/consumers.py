@@ -117,7 +117,7 @@ log = logging.getLogger("django")
 
 from asgiref.sync import sync_to_async
 
-from channels.consumer import AsyncConsumer
+from channels.consumer import AsyncConsumer, StopConsumer
 from channels.db import database_sync_to_async
 
 
@@ -216,3 +216,4 @@ class HitConsumer(AsyncConsumer):
     async def websocket_disconnect(self, event):
         """Close player websocket connection."""
         print("disconnected", event)
+        raise StopConsumer()
