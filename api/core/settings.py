@@ -175,6 +175,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = get_env_value("CORS_ORIGIN_WHITELIST").split(" ")
 CORS_ALLOW_CREDENTIALS = bool(get_env_value("CORS_ALLOW_CREDENTIALS", 0))
 CSRF_TRUSTED_ORIGINS = get_env_value("CSRF_TRUSTED_ORIGINS").split(" ")
+ROOT_URL = "http://172.104.240.119:3000"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
