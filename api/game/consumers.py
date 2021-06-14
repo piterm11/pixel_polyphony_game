@@ -135,15 +135,14 @@ class HitConsumer(AsyncConsumer):
         except (KeyError, ValueError):
             await self.log_error("Invalid or missing game number")
             return
-        try:
-            game = Game.objects.get(id=game_number)
-        except Game.DoesNotExist:
+        game = await self.get_game(game_number)
+        if not game:
             await self.log_error(
                 f"received message, but game does not exist game_number={game_number}"
             )
             return
         if game.date_end < now():
-            await self.log_error("Game ended already")
+            await self.log_error(f"Game ended already {game.date_end.strftime('%H:%M:%S')}")
             return
         game_name = f"game-{game_number}"
         self.game_room = game_name
@@ -190,6 +189,10 @@ class HitConsumer(AsyncConsumer):
         # broadcast the event message
         await self.channel_layer.group_send(self.game_room, new_message)
 
+        await self.log_error(
+            f"New message sent '{new_message}'"
+        )
+
     async def game_message(self, event):
         """Send message with hit info."""
         # send the actual message
@@ -207,6 +210,13 @@ class HitConsumer(AsyncConsumer):
         if tone.upper() not in self.AVAILABLE_TONES:
             return None
         return Hit.objects.create(tone=tone, instrument=instrument, game=game)
+
+    @database_sync_to_async
+    def get_game(self, game_number):
+        try:
+            return Game.objects.get(id=game_number)
+        except Game.DoesNotExist:
+            return None
 
     @sync_to_async
     def log_error(self, message):

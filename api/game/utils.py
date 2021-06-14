@@ -13,7 +13,7 @@ def create_start_game_datetime() -> datetime:
 
 def create_end_game_datetime() -> datetime:
     """Create datetime object pointing to 70 seconds later than now."""
-    return now() + timedelta(seconds=70)
+    return now() + timedelta(days=5)
 
 
 def create_short_uuid() -> str:
