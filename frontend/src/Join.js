@@ -86,11 +86,7 @@ function Join() {
             const response = await axios.post(
               "http://localhost:8000/api/join/",
               login,
-              {
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                },
-              }
+              { headers: { "Content-Type": "application/json" } }
             );
             redirect_lobby(response.data.player.id);
           }}
