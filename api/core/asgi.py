@@ -40,7 +40,7 @@ application = ProtocolTypeRouter({
     "websocket": AllowedHostsOriginValidator(
         AuthMiddlewareStack(
             URLRouter([
-                url(r"^api/hit/", HitConsumer()),
+                url(r"^api/hit/(?P<game_number>[0-9]+)/$", HitConsumer()),
             ])
         ),
     ),
