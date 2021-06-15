@@ -148,7 +148,7 @@ function Game({ match }) {
     getData();
     let link = match.params.id.split("-");
     const socket = new WebSocket(
-      `ws://172.104.240.119:8000/api/hit/${link[0]}/`
+      `ws://${window.location.hostname}:8000/api/hit/${link[0]}/`
     );
     socket.onopen = () => {
       console.log("Hello from websocket");
@@ -176,10 +176,12 @@ function Game({ match }) {
           let xd = document.getElementsByClassName(instrument)
           xd = [...xd]
           xd = xd[0]
-          xd.style.border = "4px solid green"
-          setTimeout(() =>{
-            xd.style.border = "4px solid black"
-          }, e.target.duration * 1000)
+          if (typeof xd !== "undefined" && xd.style.border !== "4px solid green"){
+            xd.style.border = "4px solid green"
+            setTimeout(() =>{
+              xd.style.border = "4px solid black"
+            }, e.target.duration * 1000)
+          }
         }
       });
       audio.play();
@@ -218,6 +220,9 @@ function Game({ match }) {
         );
       }, 200);
     });
+    setInterval(() => {
+			setTime(time => time + 1)
+		}, 1000)
   }, []);
   const [lobby, setItem] = useState({
     team: [],
@@ -229,7 +234,7 @@ function Game({ match }) {
     let link = match.params.id.split("-");
     console.log(match.params.id);
     const item = await axios.get(
-      `http://172.104.240.119:8000/api/lobby/${link[1]}/`
+      `http://${window.location.hostname}:8000/api/lobby/${link[1]}/`
     );
     setItem(item.data);
     console.log(item.data);
@@ -279,7 +284,7 @@ function Game({ match }) {
     <div className="App">
       <div className="App-header">
         <div className="container">
-          <div className="timer">00:{time < 10 ? "0" + time : time}</div>
+          <div className="timer">{Math.floor(time / 60) < 10 ? "0" + Math.floor(time / 60) : Math.floor(time / 60)}:{time % 60 < 10 ? "0" + time % 60: time % 60}</div>
           <div className="username">{lobby.player.name}</div>
           <div className="users">
             {addUsers()}

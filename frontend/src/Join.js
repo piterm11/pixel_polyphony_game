@@ -84,7 +84,7 @@ function Join() {
               code: code,
             };
             const response = await axios.post(
-              "http://172.104.240.119:8000/api/join/",
+              `http://${window.location.hostname}:8000/api/join/`,
               login,
               { headers: { "Content-Type": "application/json" } }
             );

@@ -25,7 +25,7 @@ function Lobby({ match }) {
   });
   const getData = async () => {
     const item = await axios.get(
-      `http://172.104.240.119:8000/api/lobby/${match.params.id}/`
+      `http://${window.location.hostname}:8000/api/lobby/${match.params.id}/`
     );
     console.log("Ej");
     setItem(item.data);
@@ -36,7 +36,7 @@ function Lobby({ match }) {
   };
   const getReady = async (data) => {
     const res = await axios.put(
-      `http://172.104.240.119:8000/api/player/${match.params.id}/`,
+      `http://${window.location.hostname}:8000/api/player/${match.params.id}/`,
       data
     );
     console.log(res);
