@@ -133,7 +133,7 @@ function Game({ match }) {
         );
     }
   };
-  const [time, setTime] = useState(59);
+  const [time, setTime] = useState(0);
   var clickNotes = {
     q: 0,
     w: 1,
@@ -161,6 +161,27 @@ function Game({ match }) {
       tone = "note_" + tone;
       console.log(instrument, tone);
       let audio = new Audio(sounds[instrument][tone]);
+      audio.addEventListener('loadedmetadata', (e) => {
+        console.log(e.target.duration);
+        if (instrument === selectedInstrument){
+          let xd = document.getElementsByClassName("playground")
+          xd = [...xd]
+          xd = xd[0]
+          xd.style.boxShadow = "0 0 10px 5px green inset"
+          setTimeout(() =>{
+            xd.style.boxShadow = "none"
+          }, e.target.duration * 1000)
+        }
+        else {
+          let xd = document.getElementsByClassName(instrument)
+          xd = [...xd]
+          xd = xd[0]
+          xd.style.border = "4px solid green"
+          setTimeout(() =>{
+            xd.style.border = "4px solid black"
+          }, e.target.duration * 1000)
+        }
+      });
       audio.play();
     };
     const notes = document.getElementsByClassName("note");
@@ -248,7 +269,7 @@ function Game({ match }) {
   const addUsers = () => {
     lobby.team.forEach((player) => {
       usersComponent.push(
-        <div className="user">
+        <div className={`user ${player.instrument}`}>
           <div style={single(player.instrument, false)}>{player.name}</div>
         </div>
       );
